@@ -14,54 +14,67 @@ class Nodo:
 
 class ArbolBinario:
     """
-    Estructura del Árbol Binario de Búsqueda.
-    Se encarga de acomodar los Nodos de forma ordenada para que
-    las búsquedas sean súper rápidas.
+    Estructura del Árbol Binario de Búsqueda iterativo.
+    Se encarga de acomodar los Nodos de forma ordenada utilizando ciclos
+    para evitar errores de profundidad con la recursividad.
     """
     def __init__(self):
         self.raiz = None
 
     def insertar(self, id_asada, posicion):
-        """Añade un nuevo ID y su posición al árbol de forma ordenada."""
-        if self.raiz is None:
-            self.raiz = Nodo(id_asada, posicion)
-        else:
-            self._insertar_recursivo(self.raiz, int(id_asada), posicion)
+        """Añade un nuevo ID y su posición al árbol de forma ordenada usando un ciclo."""
+        id_asada = int(id_asada)
+        nuevo_nodo = Nodo(id_asada, posicion)
 
-    def _insertar_recursivo(self, nodo_actual, id_asada, posicion):
-        """Función auxiliar que busca el lugar correcto para el nuevo nodo."""
-        if id_asada < nodo_actual.id_asada:
-            if nodo_actual.izquierdo is None:
-                nodo_actual.izquierdo = Nodo(id_asada, posicion)
+        # Si el árbol está vacío, este es el primer nodo
+        if self.raiz is None:
+            self.raiz = nuevo_nodo
+            return
+
+        nodo_actual = self.raiz
+        
+        # Usamos un ciclo para bajar por el árbol hasta encontrar un espacio vacío
+        while True:
+            if id_asada < nodo_actual.id_asada:
+                # Si es menor, vamos a la izquierda
+                if nodo_actual.izquierdo is None:
+                    nodo_actual.izquierdo = nuevo_nodo
+                    break
+                else:
+                    nodo_actual = nodo_actual.izquierdo
+            elif id_asada > nodo_actual.id_asada:
+                # Si es mayor, vamos a la derecha
+                if nodo_actual.derecho is None:
+                    nodo_actual.derecho = nuevo_nodo
+                    break
+                else:
+                    nodo_actual = nodo_actual.derecho
             else:
-                self._insertar_recursivo(nodo_actual.izquierdo, id_asada, posicion)
-        elif id_asada > nodo_actual.id_asada:
-            if nodo_actual.derecho is None:
-                nodo_actual.derecho = Nodo(id_asada, posicion)
-            else:
-                self._insertar_recursivo(nodo_actual.derecho, id_asada, posicion)
+                # Si el ID ya existe, solo actualizamos su posición para no duplicar
+                nodo_actual.posicion = posicion
+                break
 
     def buscar(self, id_asada):
         """
-        Busca un ID en el árbol. 
-        Devuelve la posición física en el archivo principal si lo encuentra, o None si no existe.
+        Busca un ID en el árbol usando un ciclo. 
+        Devuelve la posición física en el archivo si lo encuentra, o None si no existe.
         """
-        return self._buscar_recursivo(self.raiz, int(id_asada))
-
-    def _buscar_recursivo(self, nodo_actual, id_asada):
-        """Función auxiliar que navega por las ramas del árbol para encontrar el ID."""
-        if nodo_actual is None:
-            return None
-        if nodo_actual.id_asada == id_asada:
-            return nodo_actual.posicion
-        elif id_asada < nodo_actual.id_asada:
-            return self._buscar_recursivo(nodo_actual.izquierdo, id_asada)
-        else:
-            return self._buscar_recursivo(nodo_actual.derecho, id_asada)
-
+        id_asada = int(id_asada)
+        nodo_actual = self.raiz
+        
+        # Navegamos por el árbol hasta encontrarlo o llegar al final
+        while nodo_actual is not None:
+            if id_asada == nodo_actual.id_asada:
+                return nodo_actual.posicion
+            elif id_asada < nodo_actual.id_asada:
+                nodo_actual = nodo_actual.izquierdo
+            else:
+                nodo_actual = nodo_actual.derecho
+                
+        return None
 
 def guardar_arbol_binario(arbol, nombre_archivo="indice_arbol.bin"):
-    """Guarda todo el árbol en un segundo archivo binario usando pickle."""
+    """Guarda todo el árbol en un archivo binario usando pickle."""
     with open(nombre_archivo, "wb") as archivo:
         pickle.dump(arbol, archivo)
     print(f"¡Árbol binario guardado correctamente en {nombre_archivo}!")
@@ -76,21 +89,3 @@ def cargar_arbol_binario(nombre_archivo="indice_arbol.bin"):
     except FileNotFoundError:
         print("El archivo del árbol no existe aún.")
         return None
-
-if __name__ == "__main__":
-    posiciones_de_prueba = {
-        "1790": 0,
-        "200": 150,
-        "3000": 300
-    }
-    
-    mi_arbol = ArbolBinario()
-    for asada_id, pos in posiciones_de_prueba.items():
-        mi_arbol.insertar(asada_id, pos)
-        
-    guardar_arbol_binario(mi_arbol)
-    
-    arbol_recuperado = cargar_arbol_binario()
-    if arbol_recuperado:
-        pos_encontrada = arbol_recuperado.buscar("1790")
-        print(f"Resultado de búsqueda para 1790: Se encuentra en el byte {pos_encontrada}")
