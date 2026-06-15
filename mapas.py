@@ -6,9 +6,8 @@ from pyproj import Transformer
 
 def generar_mapa_asadas(lista_asadas, nombre_archivo="mapa_asadas.html"):
     """
-    Recibe una lista de diccionarios de ASADAS (con sus datos completos),
+    Recibe una lista de diccionarios de ASADAS,
     convierte sus coordenadas CRTM05 a WGS84 y genera un mapa HTML con marcadores.
-    Abre el mapa en el navegador predeterminado.
     """
     if not lista_asadas:
         print("No se proporcionaron ASADAS para graficar en el mapa.")
@@ -49,7 +48,7 @@ def generar_mapa_asadas(lista_asadas, nombre_archivo="mapa_asadas.html"):
     centro_lat = suma_lat / len(asadas_validas)
     centro_lon = suma_lon / len(asadas_validas)
 
-    mapa = folium.Map(location=[centro_lat, centro_lon], zoom_start=10)
+    mapa = folium.Map(location=[centro_lat, centro_lon], zoom_start=12)
 
     for asada in asadas_validas:
         nombre = asada.get('operador', 'ASADA sin nombre')
@@ -75,13 +74,3 @@ def generar_mapa_asadas(lista_asadas, nombre_archivo="mapa_asadas.html"):
     except Exception as e:
         print(f"Error al guardar o abrir el mapa: {e}")
         return False
-
-if __name__ == "__main__":
-    import json
-    try:
-        with open("asadas.json", "r", encoding="utf-8") as f:
-            datos_completos = json.load(f)
-            lista_prueba = datos_completos.get('value', [])[:5]
-            generar_mapa_asadas(lista_prueba)
-    except FileNotFoundError:
-        print("El archivo asadas.json no existe. Corre el script principal primero.")
